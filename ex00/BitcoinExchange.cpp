@@ -110,14 +110,17 @@ void BitcoinExchange::execute(const std::string& filename) {
 	std::getline(file, line); // skips the header: "date | value"
 
 	while (std::getline(file, line)) {
-		size_t delim = line.find(" | ");
+		size_t delim = line.find(" | "); // includes spaces
 		if (delim == std::string::npos) {
 			std::cout << "Error: bad input => " << line << std::endl;
 			// continue를 만나면 아래 코드는 전부 무시하고 다시 루프의 처음으로 돌아간다.
 			continue;
 		}
 
+		// 2011-01-03 | 3 => "2011-01-03"
 		std::string date = line.substr(0, delim);
+		// now, line is "| 3" by the previous code
+		// substr(delim + 3)
 		float value = static_cast<float>(atof(line.substr(delim + 3).c_str()));
 
 		if (!isValidDate(date)) {
