@@ -1,6 +1,14 @@
 /*
 This exercise is about comparing the difference in time efficiency based on the type of 
 container used in sorting.
+
+std::vector is used to maximize the random access efficiency of the Ford-Johnson algorithm.
+    1. it stores data contiguously in memory, so index access is very fast.
+    2. In this algorithm, middle insertions are not frequent, it is the most efficient.
+std::deque is used for bidirectional data scalability(데이터 양방향 확장성) and flexibility of memory allocation
+    1. it consists of multiple memory blocks (chunks), so unlike Vector,
+       there is no need to copy the entire data when allocating new memory.
+    2. When there is a possibility of manipulating data back and forth, memory reallocation costs are lower than Vector.
 */
 #ifndef PMERGEME_HPP
 # define PMERGEME_HPP
