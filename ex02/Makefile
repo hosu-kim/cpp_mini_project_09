@@ -1,8 +1,8 @@
 CXX := c++
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98
 
-NAME := btc # DOC: The program name is `btc`.
-SRCS := main.cpp BitcoinExchange.cpp
+NAME := PmergeMe # DOC: The name of the program is PmergeMe.
+SRCS := main.cpp PmergeMe.cpp
 OBJS := $(SRCS:.cpp=.o)
 
 all: $(NAME)

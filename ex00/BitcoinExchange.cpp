@@ -1,6 +1,39 @@
 #include "BitcoinExchange.hpp"
 
-// ================ PRIVATE MEMBER FUNCTIONS ================
+// ========================= ORTHODOX CANONICAL FORM =========================
+BitcoinExchange::BitcoinExchange() {
+	std::ifstream file("data.csv");
+	if (!file.is_open()) {
+		std::cerr << "Error: could not open data.csv" << std::endl;
+		return;
+	}
+	std::string line;
+	std::getline(file, line); // skips the header: "date | value"
+
+	while (std::getline(file, line)) {
+		size_t delim = line.find(',');
+		if (delim != std::string::npos) {
+			std::string date = line.substr(0, delim);
+			float rate = static_cast<float>(atof(line.substr(delim + 1).c_str()));
+			_data[date] = rate;
+		}
+	}
+	file.close();
+}
+
+BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) { *this = other; }
+
+BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
+	if (this !=  &other) this->_data = other._data;
+	return *this;
+}
+
+BitcoinExchange::~BitcoinExchange() {}
+
+
+// ===================== PRIVATE MEMBER FUNCTIONS =====================
+
+// Validates if the date format is YYYY-MM-DD and the date is appropriate.
 bool BitcoinExchange::isValidDate(const std::string& date) const {
 	// 2026-03-13 => 10 characters, 4th char: '-', 7th char: '-'
 	if (date.length() != 10 || date[4] != '-' || date[7] != '-') return false;
@@ -31,6 +64,8 @@ bool BitcoinExchange::isValidDate(const std::string& date) const {
 	return true;
 }
 
+// checks values(keys) in the input.txt and returns true if valid or false if invalid
+// input.txt: e.g., "2011-01-03 | 3"
 bool BitcoinExchange::isValidValue(const float value) const {
 	// DOC: A valid value must be either a float or a positive integer, between 0 and 1000.
 	// e.g., if '-1' is given
@@ -60,56 +95,29 @@ float BitcoinExchange::getExchangeRate(const std::string& date) {
 		return it->second; // Case 1: exact date found in datebase.
 	
 	// begin(): the first iterator in the map
-	if (it == _data.begin()) return -1; // no earlier date exists in the database
+	if (it == _data.begin()) return -1; // no earlier date exists when the date is not found in the database
 	// DOC: If the date used in the input does not exist in your DB then you
 	//      must use the closest date contained in your DB.
-	// --it => moves back to the nearest past date
+	// --it => why? according to the doc, it need to move back to the nearest past date
+	//         e.g, 2026-01-05 => --it => 2026-01-03
 	--it;
 	return it->second; // returns value
 }
-//==============================================================================
-// ORTHODOX CANONICAL FORM
-BitcoinExchange::BitcoinExchange() {
-	std::ifstream file("data.csv");
-	if (!file.is_open()) {
-		std::cerr << "Error: could not open data.csv" << std::endl;
-		return;
-	}
-	std::string line;
-	std::getline(file, line); // skips the header: "date | value"
 
-	while (std::getline(file, line)) {
-		size_t delim = line.find(',');
-		if (delim != std::string::npos) {
-			std::string date = line.substr(0, delim);
-			float rate = static_cast<float>(atof(line.substr(delim + 1).c_str()));
-			_data[date] = rate;
-		}
-	}
-	file.close();
-}
-
-BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) { *this = other; }
-
-BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
-	if (this !=  &other) this->_data = other._data;
-	return *this;
-}
-
-BitcoinExchange::~BitcoinExchange() {}
-//==============================================================================
-
+// ==================== PUBLIC MEMBER FUNCTION ====================
+// Reads data.csv and input.txt, extract necessary values, performs calculations,
+// and prints to the console.
 void BitcoinExchange::execute(const std::string& filename) {
-	std::ifstream file(filename.c_str());
-	if (!file.is_open()) {
+	std::ifstream input_txt(filename.c_str());
+	if (!input_txt.is_open()) {
 		std::cerr << "Error: could not open input.txt" << std::endl;
 		return;
 	}
 
 	std::string line;
-	std::getline(file, line); // skips the header: "date | value"
+	std::getline(input_txt, line); // skips the header: "date | value"
 
-	while (std::getline(file, line)) {
+	while (std::getline(input_txt, line)) {
 		size_t delim = line.find(" | "); // includes spaces
 		if (delim == std::string::npos) {
 			std::cout << "Error: bad input => " << line << std::endl;
@@ -133,9 +141,9 @@ void BitcoinExchange::execute(const std::string& filename) {
 		}
 
 		float rate = getExchangeRate(date);
-		if (rate == -1) {
+		if (rate == -1) { // no earlier date exists when the date is not found in the database
 			std::cout << "Error: no historical data => " << date << std::endl;
-		} else {
+		} else { // This is Normal operation
 			std::cout << date << " => " << value << " = " << (value * rate) << std::endl;
 		}
 	}
