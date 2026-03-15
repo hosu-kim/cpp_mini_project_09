@@ -48,7 +48,7 @@ std::vector<int> PmergeMe::generateJacobsthalSequence(int n) {
 
 // 원본 데이터를 직접 수정하기 위해 참조를 인수로 받음.
 // The implementation of Ford-Johnson algorithm
-// => This algorithm uses a Merge-Insertion method that recursively sorts
+// => This algorithm uses a Merge-Insertion method(Ford-Johnson Algorithm) that recursively sorts
 // the winners and then inserts the losers back into their appropriate positions.
 void PmergeMe::sortVector(std::vector<int>& v) {
 	// if no element or only one element
