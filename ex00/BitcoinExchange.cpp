@@ -8,7 +8,7 @@ BitcoinExchange::BitcoinExchange() {
 		return;
 	}
 	std::string line;
-	std::getline(file, line); // skips the header: "date | value"
+	std::getline(file, line); // skips the header: "date,exchange_rate"
 
 	while (std::getline(file, line)) {
 		size_t delim = line.find(',');
@@ -24,7 +24,7 @@ BitcoinExchange::BitcoinExchange() {
 BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) { *this = other; }
 
 BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
-	if (this !=  &other) this->_data = other._data;
+	if (this != &other) this->_data = other._data;
 	return *this;
 }
 
@@ -92,8 +92,9 @@ float BitcoinExchange::getExchangeRate(const std::string& date) {
 	// 1. Checks 'it != end()' first to avoid accessing invalid memory => using '->'
 	// 2. Then check 'it->first == date' for an exact match
 	if (it != _data.end() && it->first == date)
-		return it->second; // Case 1: exact date found in datebase.
+		return it->second; // Case 1: exact date found in the database.
 	
+	// Case 2: exact date is not found in the database
 	// begin(): the first iterator in the map
 	if (it == _data.begin()) return -1; // no earlier date exists when the date is not found in the database
 	// DOC: If the date used in the input does not exist in your DB then you
@@ -127,7 +128,7 @@ void BitcoinExchange::execute(const std::string& filename) {
 
 		// 2011-01-03 | 3 => "2011-01-03"
 		std::string date = line.substr(0, delim);
-		// now, line is "| 3" by the previous code
+		// now, the line is " | 3" by the previous code
 		// substr(delim + 3)
 		float value = static_cast<float>(atof(line.substr(delim + 3).c_str()));
 

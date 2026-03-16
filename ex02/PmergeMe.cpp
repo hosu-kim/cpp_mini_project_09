@@ -57,11 +57,12 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 	//------------------------------ Code block 1 ------------------------------
 	// Check if the number of elements is even, if not, store the last element
 	// int a variable and remove it to make it even.
+	// 쌍으로 묶어 비교하기 때문에 홀수면 마지막 원소는 잠시 빼두고 알고리즘 시작
 	// 나머지있니?
 	bool hasLeftover = (v.size() % 2 != 0);
 	int leftover = 0;
 	if (hasLeftover) {
-		leftover = v.back();
+		leftover = v.back(); // 마지막 원소의 값을 가져온다
 		v.pop_back(); // deletes the last element
 	}
 	//------------------------------ Code block 2 ------------------------------
@@ -77,32 +78,40 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 	// Filers out only the large numbers from the pairs and store them
 	// in the `mainChain`.
 	// e.g., Before: (5, 2) (7, 3) (9, 1) => After: 5, 7, 9
-	for (size_t i = 0; i < pairs.size(); ++i) mainChain.push_back(pairs[i].first);
+	for (size_t i = 0; i < pairs.size(); ++i) mainChain.push_back(pairs[i].first); // 다시 승자들을 분류한다.
 	//------------------------------ Code block 4 ------------------------------
 	sortVector(mainChain); // Sorts the mainChain (winners) in ascending order
 	                       // it doesn't have all numbers!
 
 	//------------------------------ Code block 5 ------------------------------
 	std::vector<int> pendingElements;
-	std::vector<int> result = mainChain;
-	std::vector<bool> pairUsed(pairs.size(), false);
+	std::vector<int> result = mainChain; // has winners in ascending order
+	std::vector<bool> pairUsed(pairs.size(), false); // pairs.size()만큼의 칸을 만들고 false로 채운다.
 	
 	// `pairs` still has the first sort
 	// result has numbers in ascending order
 	// finds the smallest winner number and insert it's loser number in front of the result and exit the loop
+	// for: iterates pairs
 	for (size_t j = 0; j < pairs.size(); ++j) {
-		if (pairs[j].first == result[0]) {
+		if (pairs[j].first == result[0]) { // 가장 작은 winner 있는 짝을 pairs에서 찾았다면
 			// insert(): pushes the provided number into the position in the container
 			// insert(position, number);
+			// begin(): 컨데이너의 첫번째 원소
+			// 가장 작은 승자의 패자는 가장 작은 그룹에 속할 확률이 
+			// 매우 높으니 result의 맨 앞에 끼워 넣어 준다.
 			result.insert(result.begin(), pairs[j].second);
 			pairUsed[j] = true;
 			break; // for 루프 중단
 		}
 	}
 	//------------------------------ Code block 6 ------------------------------
-	// Stores the loser numbers of the winnder numbers sorted in ascending order
-	// why? to mathematically minimize the number of comparisons in binary search
+	/* Lines up the losers follwing the winners in order. => pendingElements.
+	   승자들의 순서에 맞춰서 그에 딸린 패자들을 줄 세운다.
+	   why? to mathematically minimize the number of comparisons in binary search
+	    */
+	// iterates mainChain (winners in ascending order)
 	for (size_t i = 1; i < mainChain.size(); ++i) {
+		// iterates pairs: (winner, loser), (winner, loser)...
 		for (size_t j = 0; j < pairs.size(); ++j) {
 			if (!pairUsed[j] && pairs[j].first == mainChain[i]) {
 				pendingElements.push_back(pairs[j].second);
