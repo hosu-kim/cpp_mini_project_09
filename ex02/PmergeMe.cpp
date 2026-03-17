@@ -149,6 +149,7 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 
 	// If the number of elements is odd, interts the leftover element int to its correct
 	// position using binary search
+	// 데이터가 홀수라서 남은 수가 있다면 이진 탐색을 사용해서 적절한 위치에 넣는다.
 	if (hasLeftover) {
 		std::vector<int>::iterator it = std::lower_bound(result.begin(), result.end(), leftover);
 		result.insert(it, leftover);
