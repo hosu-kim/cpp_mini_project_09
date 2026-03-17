@@ -137,6 +137,9 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 			// lower_bound(): uses binary search, which has 0(log N) complexity.
 			//                This means it can find the insertion point very efficiently,
 			//                even as the sorted list grows larger.
+			//                타겟 이상의 값이 처음 나오는 위치 찾기
+			//                왜 바이너리 탐색이라고 하냐면 매 단계마다
+			//                선택지를 왼쪽 절반으로 갈 것인가, 오른쪽 절반으로 갈 것인가 둘로 나누기 때문이다.
 			std::vector<int>::iterator it = std::lower_bound(result.begin(), result.end(), val);
 			result.insert(it, val);
 		}
