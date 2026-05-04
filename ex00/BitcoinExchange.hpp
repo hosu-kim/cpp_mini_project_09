@@ -17,12 +17,14 @@ utilizing `std::map` to handle data storage and search.
 class BitcoinExchange {
 	private:
 		// std::map: Associative(연관) container; stores key-value pairs.
-		//           Methods
-		//           1. data["dataKey"] = dataValue;
-		//           2. data.insert(std::make_pair(dataKey, dataValue));
-		std::map<std::string, float> _data;
+		//           Two Methods of initializing a map container
+		//             1. data["dataKey"] = dataValue;
+		//             2. data.insert(std::make_pair(dataKey, dataValue));
+		std::map<std::string, float> _data; // key: string, value: float
 
+		// Check if the date format in is appropriate.
 		bool isValidDate(const std::string& date) const;
+		// Checks if the values of bitcoin amounts in input.txt are in the correct range
 		bool isValidValue(const float value) const;
 		float getExchangeRate(const std::string& date);
 
