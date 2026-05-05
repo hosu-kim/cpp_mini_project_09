@@ -1,7 +1,7 @@
 CXX := c++
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98
 
-NAME := btc # DOC: The program name is `btc`.
+NAME := btc # DOC => The program name is `btc`.
 SRCS := main.cpp BitcoinExchange.cpp
 OBJS := $(SRCS:.cpp=.o)
 

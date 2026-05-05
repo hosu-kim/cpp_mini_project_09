@@ -44,14 +44,17 @@ void RPN::calculate(const std::string& expression) {
 		if (std::isdigit(c)) {
 			_stack.push(c - '0');
 		} else if (isOperator(c)) {
+			// ex., Input => "2 +"
 			if (_stack.size() < 2) {
 				std::cerr<< "Error" << std::endl;
 				return;
 			}
 
+			// std::stack::top => returns a reference to the top element in the stack.
 			int second = _stack.top(); _stack.pop();
 			int first = _stack.top(); _stack.pop();
 			
+			// Stores the result into the container.
 			_stack.push(performOperation(first, second, c));
 		} else {
 			std::cerr << "Error" << std::endl;
