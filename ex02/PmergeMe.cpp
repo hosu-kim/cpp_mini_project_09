@@ -13,26 +13,32 @@ PmergeMe& PmergeMe::operator=(const PmergeMe& src) {
 PmergeMe::~PmergeMe() {}
 //==============================================================================
 // checks if the input string is a valid integer after conversion
+//   false:
+//     1. string is empty
+//     2. non-digit character
+//     3. 
 bool PmergeMe::isPositiveInteger(const std::string& s) {
 
-	// if the string is empty
+	// checks if the string is empty
 	if (s.empty()) return false;
-	// if the string has any non-digit character
+	// checks if the string has any non-digit character
 	for (size_t i = 0; i < s.length(); ++i) {
 		if (!std::isdigit(s[i])) return false;
 	}
 
-	// if the string after conversion to int overflows or negative integer
+	// checks if converted number overflows or negative integer
 	long long val = std::atoll(s.c_str());
 	if (val > INT_MAX || val < 0) return false;
 
 	return true;
 }
 
+/* Generates a Jacobsthal sequence where the values continues to grow
+   until the last element reaches or exceeds the given value n.
+*/
 // Implementation of Jacobsthal Sequence: J_n = J_{n-1} + 2 * J_{n-2}
 // => the next number is 'the previous number + 2 * the number before the previous one'
 // e.g., 1 3 5 11 21...
-// int n: numbers of Jacobsthal Sequence elements you wanna make
 // The sequence makes all elements find their places with the fewest possible comparisons.
 std::vector<int> PmergeMe::generateJacobsthalSequence(int n) {
 	std::vector<int> jacob;
@@ -70,8 +76,8 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 	// e.g., Before: 2 5 3 7 1 9 => After: (5, 2) (7, 3) (9, 1)
 	std::vector<std::pair<int, int> > pairs;
 	for (size_t i = 0; i < v.size(); i += 2) { // i => 0, 2, 4, 6...
-		if (v[i] < v[i + 1]) pairs.push_back(std::make_pair(v[i + 1], v[i]));
-		else pairs.push_back(std::make_pair(v[i], v[i + 1]));
+		if (v[i] < v[i + 1]) pairs.push_back(std::make_pair(v[i + 1], v[i])); // {big, small}
+		else pairs.push_back(std::make_pair(v[i], v[i + 1])); // {big, small}
 	}
 	//------------------------------ Code block 3 ------------------------------
 	std::vector<int> mainChain;
@@ -92,6 +98,7 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 	// result has numbers in ascending order
 	// finds the smallest winner number and insert it's loser number in front of the result and exit the loop
 	// for: iterates pairs
+	// 가장 작은 승자의 짝궁을 찾고 그냥 맨 앞에 꽂아넣는 코드.
 	for (size_t j = 0; j < pairs.size(); ++j) {
 		if (pairs[j].first == result[0]) { // 가장 작은 winner 있는 짝을 pairs에서 찾았다면
 			// insert(): pushes the provided number into the position in the container
@@ -106,10 +113,11 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 	}
 	//------------------------------ Code block 6 ------------------------------
 	/* Lines up the losers follwing the winners in order. => pendingElements.
-	   승자들의 순서에 맞춰서 그에 딸린 패자들을 줄 세운다.
+	   오름차순으로 정렬된 승자들의 순서에 맞춰서 짝궁인 패자들을 pendingElements에 저장하여 줄 세운다.
 	   why? to mathematically minimize the number of comparisons in binary search
 	    */
 	// iterates mainChain (winners in ascending order)
+	// 앞선 코드에서 가장 작은 승자의 짝꿍을 result에 꽂아 넣었기 때문에 인덱스를 1부터 시작한다.
 	for (size_t i = 1; i < mainChain.size(); ++i) {
 		// iterates pairs: (winner, loser), (winner, loser)...
 		for (size_t j = 0; j < pairs.size(); ++j) {
@@ -124,14 +132,17 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 	//------------------------------ Code block 7 ------------------------------
 	// Insert pending elements in the optimal Jacobstal order
 	// to minimize the number of comparisons using binary search
+	// 앞에 하나 빼고 패자들을 모아 놓은 컨테이너의 크기로 야콥스탈 배열을 생성한다.
 	std::vector<int> jacob = generateJacobsthalSequence(pendingElements.size());
 	size_t prevJacob = 0;
 	for (size_t i = 0; i < jacob.size(); ++i) {
 		size_t currentJacob = jacob[i];
 		// Ensure currentJacob does not exceed the actual number of peding elements
 		// to prevent 'out of bounds' errors.
+		// 현재 야콥스탈 배열의 수가 패자 모음의 수들보다 넘지 않도록 최대치를 조정한다.
 		if (currentJacob > pendingElements.size()) currentJacob = pendingElements.size();
 
+		// 야콥스탈 수열을 써서 패자들을 result에 역순으로 삽입한다.
 		for (size_t j = currentJacob; j > prevJacob; --j) {
 			int val = pendingElements[j - 1];
 			// lower_bound(): uses binary search, which has 0(log N) complexity.
@@ -140,15 +151,18 @@ void PmergeMe::sortVector(std::vector<int>& v) {
 			//                타겟 이상의 값이 처음 나오는 위치 찾기
 			//                왜 바이너리 탐색이라고 하냐면 매 단계마다
 			//                선택지를 왼쪽 절반으로 갈 것인가, 오른쪽 절반으로 갈 것인가 둘로 나누기 때문이다.
+			// 1. 비교횟수를 최소화하기 위해 사용
+			// 2. 승자들을 가지고 있는 result에 패자들을 삽입하기 위해 사용
 			std::vector<int>::iterator it = std::lower_bound(result.begin(), result.end(), val);
-			result.insert(it, val);
+			result.insert(it, val); // it: 찾은 메모리 위치, val: 꽂아 넣을 값
 		}
 		prevJacob = currentJacob;
-		if (prevJacob >= pendingElements.size()) break;
+		if (prevJacob >= pendingElements.size()) break; // 패자들을 다 result에 꽂아 넣었으면 끝낸다.
 	}
 
 	// If the number of elements is odd, interts the leftover element int to its correct
 	// position using binary search
+	// 알고리즘의 첫 단계가 두 개씩 짝짓는 것이기 때문에 홀수일 때 빼둔 마지막 원소는 마지막에 처리해준다.
 	// 데이터가 홀수라서 남은 수가 있다면 이진 탐색을 사용해서 적절한 위치에 넣는다.
 	if (hasLeftover) {
 		std::vector<int>::iterator it = std::lower_bound(result.begin(), result.end(), leftover);
@@ -256,3 +270,11 @@ void PmergeMe::execute(int argc, char* argv[]) {
 	std::cout << "Time to process a range of " << _deq.size() << " elements with std::deque : "
 	<< std::fixed << std::setprecision(5) << _deqTime << " us" << std::endl;
 }
+
+/* std::vector와 std::deque의 차이
+     vector: 요소들이 하나의 연속된 메모리로 이루어져 있어 접근 속도는 빠르지만,
+             삽입할 때 뒤에 있는 데이터들을 하나 씩 뒤로 밀어야 해서 삽입 비용이 크다.
+     deque: 요소들이 여러 개의 작은 덩어리로 나뉘어 연결되어 있어 접근 속도는 비교적 느리지만, 삽입 속도가 비교적 빠르다.
+	        * 얼마나 큰 덩어리로 묶을 것인가는 컴파일러(STL 내부 구현체)가 자동으로 결정함.
+            * 덩어리들의 메모리 주소도 자동으로 결정이됨.
+*/
